@@ -88,7 +88,7 @@ FileItem* FileIterator::search(const string& fileMask)
             }
             else if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
             {
-                string name = FindData.name;
+                string name = string(FindData.name);
                 string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
                 if (path == "*.*")
                     path = "root";
