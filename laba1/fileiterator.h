@@ -21,12 +21,14 @@ class FileIterator
     FileIterator* subIterator;
 
     string fileMask;
+    intptr_t FindHandle;
 
     inline bool IsDirectory(const _finddata_t &FindData);
     bool compareToMask(const string& mask, const string& file);
 
 public:
-    FileIterator();
+    FileIterator() : FindHandle(NULL) {};
+    FileIterator(const string& fileMask);
     void setFileMask(const string& mask);
     bool hasMore();
     FileItem* next();

@@ -1,0 +1,16 @@
+# depslib dependency file v1.0
+1477247868 source:c:\users\nikita\documents\github\techprog\laba1\fileiterator.cpp
+	"fileiterator.h"
+	<io.h>
+	<string>
+	<iostream>
+
+1477247119 c:\users\nikita\documents\github\techprog\laba1\fileiterator.h
+	<string>
+	<io.h>
+
+1477246516 source:c:\users\nikita\documents\github\techprog\laba1\main.cpp
+	"fileiterator.h"
+	<string>
+	<iostream>
+

@@ -5,7 +5,12 @@
 
 using namespace std;
 
-FileIterator::FileIterator() {};
+//FileIterator::FileIterator() {};
+
+FileIterator::FileIterator(const string& fileMask)
+{
+    this->fileMask = fileMask;
+}
 
 inline bool FileIterator::IsDirectory(const _finddata_t &FindData)
     {
@@ -61,14 +66,13 @@ bool FileIterator::hasMore()
 FileItem* FileIterator::search(const string& fileMask)
 {
     _finddata_t FindData;
-    static intptr_t FindHandle;
 
     string defFileMask = fileMask.substr(0, fileMask.find_last_of('\\') + 1) + "*.*";
-    if (FileHandle != NULL)
+    if (FindHandle == NULL)
     {
         FindHandle = _findfirst(defFileMask.c_str(), &FindData);
         if (FindHandle == -1L)
-            return;
+            return NULL;
     }
     else
         if (_findnext(FindHandle, &FindData) != 0)
@@ -78,19 +82,17 @@ FileItem* FileIterator::search(const string& fileMask)
             {
                 string newFileMask = fileMask;
                 newFileMask.insert(fileMask.find_last_of('\\') + 1, string(FindData.name) + '\\');
-                intptr_t buf = FindHandle;
-                FindHandle = NULL;
-                this->subIterator = new FileIterator(newFileMask)
-                this->subIterator->search(newFileMask);
-                FindHandle = buf;
+                this->subIterator = new FileIterator(newFileMask);
+                while (this->subIterator->hasMore())
+                    this->subIterator->next();
             }
-            else if (compareToMask(FileMask.substr(FileMask.find_last_of('\\') + 1), string(FindData.name)))
+            else if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
             {
-                name = FindData.name;
-                path = defFileMask.substr(0, defFileMask.find_last_of('\\'))
-                if (path = "*.*")
+                string name = FindData.name;
+                string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
+                if (path == "*.*")
                     path = "root";
-                cache = new FileItem(name, path)
+                cache = new FileItem(name, path);
                 return cache;
             }
         }
@@ -112,5 +114,5 @@ FileItem::FileItem(const string& name, const string& path)
 void FileItem::show()
 {
     cout << "File :" << name << endl;
-    cout << "In directory: " << path << endl << endl
+    cout << "In directory: " << path << endl << endl;
 }

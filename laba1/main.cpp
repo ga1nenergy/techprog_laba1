@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    string FileMask;
+    string fileMask;
     FileIterator* it = new FileIterator();
 
     if (argc > 1)
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
             return 1;
     }
 
-    it->fileMask(FileMask);
+    it->setFileMask(fileMask);
 
     while (it->hasMore())
         it->next()->show();
