@@ -10,6 +10,7 @@ using namespace std;
 FileIterator::FileIterator(const string& fileMask)
 {
     this->fileMask = fileMask;
+    FindHandle = 0;
 }
 
 inline bool FileIterator::IsDirectory(const _finddata_t &FindData)
@@ -68,39 +69,30 @@ FileItem* FileIterator::search(const string& fileMask)
     _finddata_t FindData;
 
     string defFileMask = fileMask.substr(0, fileMask.find_last_of('\\') + 1) + "*.*";
-    if (FindHandle == NULL)
-    {
+    if (FindHandle == 0)
         FindHandle = _findfirst(defFileMask.c_str(), &FindData);
-        if (FindHandle == -1L)
-            return NULL;
-    }
     else
-        if (_findnext(FindHandle, &FindData) != 0)
-        {
-            if ((FindData.name != string(".")) && (FindData.name != string("..")))
-            if (IsDirectory(FindData))
-            {
-                string newFileMask = fileMask;
-                newFileMask.insert(fileMask.find_last_of('\\') + 1, string(FindData.name) + '\\');
-                this->subIterator = new FileIterator(newFileMask);
-                while (this->subIterator->hasMore())
-                    this->subIterator->next();
-            }
-            else if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
-            {
-                string name = string(FindData.name);
-                string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
-                if (path == "*.*")
-                    path = "root";
-                cache = new FileItem(name, path);
-                return cache;
-            }
-        }
-        else
-        {
-            _findclose(FindHandle);
-            return NULL;
-        }
+        _findnext(FindHandle, &FindData);
+    if (FindHandle == -1L)
+        _findclose(FindHandle);
+        return NULL;
+    if (IsDirectory(FindData) && ((FindData.name != string(".")) || (FindData.name != string(".."))))
+    {
+        string newFileMask = fileMask;
+        newFileMask.insert(fileMask.find_last_of('\\') + 1, string(FindData.name) + '\\');
+        this->subIterator = new FileIterator(newFileMask);
+        while (this->subIterator->hasMore())
+            this->subIterator->next();
+    }
+    else if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
+    {
+        string name = string(FindData.name);
+        string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
+        if (path == "*.*")
+            path = "root";
+        cache = new FileItem(name, path);
+        return cache;
+    }
 }
 
 FileItem::FileItem() {};
