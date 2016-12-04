@@ -71,28 +71,33 @@ FileItem* FileIterator::search(const string& fileMask)
     string defFileMask = fileMask.substr(0, fileMask.find_last_of('\\') + 1) + "*.*";
     if (FindHandle == 0)
         FindHandle = _findfirst(defFileMask.c_str(), &FindData);
-    else
-        _findnext(FindHandle, &FindData);
-    if (FindHandle == -1L)
-        _findclose(FindHandle);
+    while (_findnext(FindHandle, &FindData) != -1L)
+    {
+        if ((FindData.name == string(".")) || (FindData.name == string("..")))
+        {
+            //FindHandle = _findnext(FindHandle, &FindData);
+            continue;
+        }
+        if (IsDirectory(FindData))
+        {
+            string newFileMask = fileMask;
+            newFileMask.insert(fileMask.find_last_of('\\') + 1, string(FindData.name) + '\\');
+            this->subIterator = new FileIterator(newFileMask);
+            while (this->subIterator->hasMore())
+                this->subIterator->next()->show();
+        }
+        if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
+        {
+            string name = string(FindData.name);
+            string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
+            if (path == "*.*")
+                path = "root";
+            cache = new FileItem(name, path);
+            return cache;
+        }
+    }
+    _findclose(FindHandle);
         return NULL;
-    if (IsDirectory(FindData) && ((FindData.name != string(".")) || (FindData.name != string(".."))))
-    {
-        string newFileMask = fileMask;
-        newFileMask.insert(fileMask.find_last_of('\\') + 1, string(FindData.name) + '\\');
-        this->subIterator = new FileIterator(newFileMask);
-        while (this->subIterator->hasMore())
-            this->subIterator->next();
-    }
-    else if (compareToMask(fileMask.substr(fileMask.find_last_of('\\') + 1), string(FindData.name)))
-    {
-        string name = string(FindData.name);
-        string path = defFileMask.substr(0, defFileMask.find_last_of('\\'));
-        if (path == "*.*")
-            path = "root";
-        cache = new FileItem(name, path);
-        return cache;
-    }
 }
 
 FileItem::FileItem() {};
